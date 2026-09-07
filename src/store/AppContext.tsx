@@ -17,6 +17,7 @@ import {
   fetchStateFromSupabase,
   seedSupabaseIfEmpty,
   syncStateToSupabase,
+  subscribeToSupabase,
 } from '../lib/supabase';
 
 // ---- State ----
@@ -250,7 +251,7 @@ const AppContext = createContext<AppContextType | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, undefined, getInitialState);
 
-  // Load initial data from Supabase if configured
+  // Load initial data and subscribe to Supabase Realtime changes
   useEffect(() => {
     if (!isSupabaseConfigured) return;
 
@@ -264,8 +265,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     });
 
+    const unsubscribe = subscribeToSupabase((remoteState) => {
+      if (isMounted && remoteState) {
+        dispatch({ type: 'LOAD_STATE', payload: remoteState });
+      }
+    });
+
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 

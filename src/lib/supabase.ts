@@ -30,7 +30,7 @@ export async function fetchStateFromSupabase(): Promise<FullAppState | null> {
       supabase.from('config_blocks').select('*'),
       supabase.from('options').select('*'),
       supabase.from('simulations').select('*'),
-      supabase.from('role_rates').select('*').single(),
+      supabase.from('role_rates').select('*').maybeSingle(),
     ]);
 
     if (productsRes.error) {
@@ -38,7 +38,6 @@ export async function fetchStateFromSupabase(): Promise<FullAppState | null> {
       return null;
     }
 
-    // Map database snake_case to camelCase types
     const products: Product[] = (productsRes.data || []).map((p) => ({
       id: p.id,
       name: p.name,
@@ -106,19 +105,19 @@ export async function fetchStateFromSupabase(): Promise<FullAppState | null> {
     const ratesData = ratesRes.data;
     const rates: RoleHourlyRates = ratesData
       ? {
-        devHourlyRate: Number(ratesData.dev_hourly_rate ?? 60),
-        salesHourlyRate: Number(ratesData.sales_hourly_rate ?? 45),
-        designHourlyRate: Number(ratesData.design_hourly_rate ?? 50),
-        csmHourlyRate: Number(ratesData.csm_hourly_rate ?? 40),
-        baHourlyRate: Number(ratesData.ba_hourly_rate ?? 55),
-      }
+          devHourlyRate: Number(ratesData.dev_hourly_rate ?? 60),
+          salesHourlyRate: Number(ratesData.sales_hourly_rate ?? 45),
+          designHourlyRate: Number(ratesData.design_hourly_rate ?? 50),
+          csmHourlyRate: Number(ratesData.csm_hourly_rate ?? 40),
+          baHourlyRate: Number(ratesData.ba_hourly_rate ?? 55),
+        }
       : {
-        devHourlyRate: 60,
-        salesHourlyRate: 45,
-        designHourlyRate: 50,
-        csmHourlyRate: 40,
-        baHourlyRate: 55,
-      };
+          devHourlyRate: 60,
+          salesHourlyRate: 45,
+          designHourlyRate: 50,
+          csmHourlyRate: 40,
+          baHourlyRate: 55,
+        };
 
     return { products, categories, blocks, options, simulations, rates };
   } catch (err) {
@@ -127,15 +126,15 @@ export async function fetchStateFromSupabase(): Promise<FullAppState | null> {
   }
 }
 
-// ---- Push initial dataset to Supabase ----
+// ---- Seed Supabase dataset if database empty ----
 export async function seedSupabaseIfEmpty(state: FullAppState) {
   if (!supabase) return;
 
   try {
     const { count } = await supabase.from('products').select('*', { count: 'exact', head: true });
-    if (count !== null && count > 0) return; // Database is not empty
+    if (count !== null && count > 0) return; // Database already populated
 
-    console.log('[Supabase] Database empty. Seeding initial data...');
+    console.log('[Supabase] Seeding database with initial state...');
 
     if (state.products.length > 0) {
       await supabase.from('products').insert(
@@ -213,7 +212,7 @@ export async function seedSupabaseIfEmpty(state: FullAppState) {
       });
     }
 
-    console.log('[Supabase] Initial data seeded successfully!');
+    console.log('[Supabase] Initial seeding done!');
   } catch (err) {
     console.error('[Supabase] Seeding failed:', err);
   }
@@ -224,7 +223,7 @@ export async function syncStateToSupabase(state: FullAppState) {
   if (!supabase) return;
 
   try {
-    // Upsert products
+    // 1. Upsert products
     for (const p of state.products) {
       await supabase.from('products').upsert({
         id: p.id,
@@ -236,7 +235,19 @@ export async function syncStateToSupabase(state: FullAppState) {
       });
     }
 
-    // Upsert categories
+    // Delete removed products
+    const prodIds = state.products.map((p) => p.id);
+    if (prodIds.length > 0) {
+      const { data: dbProds } = await supabase.from('products').select('id');
+      if (dbProds) {
+        const toDelete = dbProds.filter((p) => !prodIds.includes(p.id)).map((p) => p.id);
+        if (toDelete.length > 0) {
+          await supabase.from('products').delete().in('id', toDelete);
+        }
+      }
+    }
+
+    // 2. Upsert categories
     for (const c of state.categories) {
       await supabase.from('categories').upsert({
         id: c.id,
@@ -247,7 +258,19 @@ export async function syncStateToSupabase(state: FullAppState) {
       });
     }
 
-    // Upsert blocks
+    // Delete removed categories
+    const catIds = state.categories.map((c) => c.id);
+    if (catIds.length > 0) {
+      const { data: dbCats } = await supabase.from('categories').select('id');
+      if (dbCats) {
+        const toDelete = dbCats.filter((c) => !catIds.includes(c.id)).map((c) => c.id);
+        if (toDelete.length > 0) {
+          await supabase.from('categories').delete().in('id', toDelete);
+        }
+      }
+    }
+
+    // 3. Upsert blocks
     for (const b of state.blocks) {
       await supabase.from('config_blocks').upsert({
         id: b.id,
@@ -267,7 +290,19 @@ export async function syncStateToSupabase(state: FullAppState) {
       });
     }
 
-    // Upsert options
+    // Delete removed blocks
+    const blockIds = state.blocks.map((b) => b.id);
+    if (blockIds.length > 0) {
+      const { data: dbBlocks } = await supabase.from('config_blocks').select('id');
+      if (dbBlocks) {
+        const toDelete = dbBlocks.filter((b) => !blockIds.includes(b.id)).map((b) => b.id);
+        if (toDelete.length > 0) {
+          await supabase.from('config_blocks').delete().in('id', toDelete);
+        }
+      }
+    }
+
+    // 4. Upsert options
     for (const o of state.options) {
       await supabase.from('options').upsert({
         id: o.id,
@@ -285,7 +320,19 @@ export async function syncStateToSupabase(state: FullAppState) {
       });
     }
 
-    // Upsert simulations
+    // Delete removed options
+    const optionIds = state.options.map((o) => o.id);
+    if (optionIds.length > 0) {
+      const { data: dbOptions } = await supabase.from('options').select('id');
+      if (dbOptions) {
+        const toDelete = dbOptions.filter((o) => !optionIds.includes(o.id)).map((o) => o.id);
+        if (toDelete.length > 0) {
+          await supabase.from('options').delete().in('id', toDelete);
+        }
+      }
+    }
+
+    // 5. Upsert simulations
     for (const s of state.simulations) {
       await supabase.from('simulations').upsert({
         id: s.id,
@@ -303,7 +350,17 @@ export async function syncStateToSupabase(state: FullAppState) {
       });
     }
 
-    // Upsert rates
+    // Delete removed simulations
+    const simIds = state.simulations.map((s) => s.id);
+    const { data: dbSims } = await supabase.from('simulations').select('id');
+    if (dbSims) {
+      const toDelete = dbSims.filter((s) => !simIds.includes(s.id)).map((s) => s.id);
+      if (toDelete.length > 0) {
+        await supabase.from('simulations').delete().in('id', toDelete);
+      }
+    }
+
+    // 6. Upsert rates
     if (state.rates) {
       await supabase.from('role_rates').upsert({
         id: 'default',
@@ -317,4 +374,24 @@ export async function syncStateToSupabase(state: FullAppState) {
   } catch (err) {
     console.error('[Supabase] Sync failed:', err);
   }
+}
+
+// ---- Realtime subscription ----
+export function subscribeToSupabase(onStateChange: (newState: FullAppState) => void) {
+  if (!supabase) return () => {};
+
+  const channel = supabase
+    .channel('app-db-changes')
+    .on('postgres_changes', { event: '*', schema: 'public' }, () => {
+      fetchStateFromSupabase().then((remoteState) => {
+        if (remoteState) {
+          onStateChange(remoteState);
+        }
+      });
+    })
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }
