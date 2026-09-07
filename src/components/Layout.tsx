@@ -106,9 +106,10 @@ export default function Layout() {
         <div
           style={{
             padding: 'var(--space-md) var(--space-lg)',
-            borderTop: '1px solid var(--border-subtle)',
-            fontSize: '0.7rem',
-            color: 'var(--text-tertiary)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            fontSize: '0.72rem',
+            color: '#627b8c',
+            fontWeight: 500,
           }}
         >
           {isSupabaseConfigured ? 'v1.0 — Cloud Sync (Supabase)' : 'v1.0 — Mode local'}
@@ -120,11 +121,11 @@ export default function Layout() {
         <header className="app-header">
           <div className="flex items-center gap-md">
             {currentProduct ? (
-              <span className="text-sm text-secondary">
+              <span className="text-sm font-semibold text-secondary">
                 {currentProduct.icon} {currentProduct.name}
               </span>
             ) : (
-              <span className="text-sm text-secondary">
+              <span className="text-sm font-semibold text-secondary">
                 Offre Produit — Configurateur
               </span>
             )}
@@ -134,9 +135,9 @@ export default function Layout() {
               <span
                 className="badge"
                 style={{
-                  background: 'rgba(74, 222, 128, 0.15)',
-                  color: '#4ade80',
-                  border: '1px solid rgba(74, 222, 128, 0.3)',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  color: '#10b981',
+                  border: '1px solid rgba(16, 185, 129, 0.25)',
                 }}
               >
                 ● Cloud Sync (Supabase)
@@ -145,9 +146,9 @@ export default function Layout() {
               <span
                 className="badge"
                 style={{
-                  background: 'rgba(250, 204, 21, 0.15)',
-                  color: '#facc15',
-                  border: '1px solid rgba(250, 204, 21, 0.3)',
+                  background: 'rgba(245, 158, 11, 0.1)',
+                  color: '#f59e0b',
+                  border: '1px solid rgba(245, 158, 11, 0.25)',
                 }}
               >
                 ● Mode Local
