@@ -152,67 +152,69 @@ export default function Dashboard() {
       </div>
 
       {/* Create Product Modal */}
-      <div className={`modal-overlay ${showModal ? 'open' : ''}`} onClick={() => setShowModal(false)}>
-        <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>Nouveau Produit</h3>
-            <button className="btn btn-ghost btn-icon" onClick={() => setShowModal(false)}>
-              ✕
-            </button>
-          </div>
-          <div className="modal-body">
-            <div className="form-group">
-              <label className="form-label">Icône</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
-                {emojiOptions.map((emoji) => (
-                  <button
-                    key={emoji}
-                    className={`btn btn-ghost btn-icon ${
-                      newProduct.icon === emoji ? 'btn-primary' : ''
-                    }`}
-                    style={{ fontSize: '1.5rem' }}
-                    onClick={() => setNewProduct({ ...newProduct, icon: emoji })}
-                  >
-                    {emoji}
-                  </button>
-                ))}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">Nouveau Produit</h3>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowModal(false)}>
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Icône</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
+                  {emojiOptions.map((emoji) => (
+                    <button
+                      key={emoji}
+                      className={`btn btn-ghost btn-icon ${
+                        newProduct.icon === emoji ? 'btn-primary' : ''
+                      }`}
+                      style={{ fontSize: '1.4rem' }}
+                      onClick={() => setNewProduct({ ...newProduct, icon: emoji })}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Nom du produit</label>
+                <input
+                  className="form-input"
+                  type="text"
+                  placeholder="Ex: PROMOGAMING, LOYALTY BOOST..."
+                  value={newProduct.name}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, name: e.target.value })
+                  }
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreateProduct()}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Description</label>
+                <textarea
+                  className="form-input form-textarea"
+                  placeholder="Description de l'offre produit..."
+                  value={newProduct.description}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, description: e.target.value })
+                  }
+                />
               </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">Nom du produit</label>
-              <input
-                className="form-input"
-                type="text"
-                placeholder="Ex: PROMOGAMING, LOYALTY BOOST..."
-                value={newProduct.name}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, name: e.target.value })
-                }
-                onKeyDown={(e) => e.key === 'Enter' && handleCreateProduct()}
-              />
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                Annuler
+              </button>
+              <button className="btn btn-primary" onClick={handleCreateProduct}>
+                Créer le produit
+              </button>
             </div>
-            <div className="form-group">
-              <label className="form-label">Description</label>
-              <textarea
-                className="form-input form-textarea"
-                placeholder="Description de l'offre produit..."
-                value={newProduct.description}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, description: e.target.value })
-                }
-              />
-            </div>
-          </div>
-          <div className="modal-footer">
-            <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
-              Annuler
-            </button>
-            <button className="btn btn-primary" onClick={handleCreateProduct}>
-              Créer le produit
-            </button>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
