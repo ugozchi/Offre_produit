@@ -180,24 +180,32 @@ export default function DependencyGraphView() {
       {/* Legend & Controls */}
       <div
         className="glass-card flex items-center justify-between"
-        style={{ padding: 'var(--space-md) var(--space-lg)', marginBottom: 'var(--space-lg)', flexWrap: 'wrap', gap: 'var(--space-md)' }}
+        style={{
+          padding: 'var(--space-md) var(--space-lg)',
+          marginBottom: 'var(--space-lg)',
+          flexWrap: 'wrap',
+          gap: 'var(--space-md)',
+          background: '#ffffff',
+          borderColor: 'var(--border-subtle)',
+          boxShadow: 'var(--shadow-sm)',
+        }}
       >
         <div className="flex items-center gap-lg text-xs" style={{ flexWrap: 'wrap' }}>
-          <span className="font-semibold text-secondary">LÉGENDE SURVOL :</span>
+          <span className="font-bold text-primary">LÉGENDE SURVOL :</span>
           <div className="flex items-center gap-xs">
-            <span style={{ width: 12, height: 12, borderRadius: 3, background: '#f87171' }} />
-            <span>Prérequis obligatoire (Amont)</span>
+            <span style={{ width: 14, height: 14, borderRadius: 4, background: '#fef2f2', border: '1.5px solid #ef4444' }} />
+            <span className="font-semibold" style={{ color: '#991b1b' }}>Prérequis (Amont)</span>
           </div>
           <div className="flex items-center gap-xs">
-            <span style={{ width: 12, height: 12, borderRadius: 3, background: '#4ade80' }} />
-            <span>Bloc débloqué (Aval)</span>
+            <span style={{ width: 14, height: 14, borderRadius: 4, background: '#f0fdf4', border: '1.5px solid #22c55e' }} />
+            <span className="font-semibold" style={{ color: '#166534' }}>Débloqué (Aval)</span>
           </div>
           <div className="flex items-center gap-xs">
-            <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--accent-primary)' }} />
-            <span>Bloc Sélectionné</span>
+            <span style={{ width: 14, height: 14, borderRadius: 4, background: '#2951a2', border: '1.5px solid #1e40af' }} />
+            <span className="font-semibold" style={{ color: '#2951a2' }}>Bloc Sélectionné</span>
           </div>
         </div>
-        <div className="text-xs text-secondary">
+        <div className="text-xs text-secondary font-medium">
           💡 Survolez ou cliquez sur un bloc pour révéler son réseau d'impact.
         </div>
       </div>
@@ -209,11 +217,14 @@ export default function DependencyGraphView() {
           width: '100%',
           maxWidth: '100%',
           overflow: 'auto',
-          padding: 'var(--space-md)',
+          padding: 'var(--space-lg)',
           position: 'relative',
-          background: 'var(--bg-secondary)',
+          background: '#f4f3f0',
           minHeight: '500px',
           boxSizing: 'border-box',
+          borderRadius: 'var(--radius-xl)',
+          border: '1px solid var(--border-subtle)',
+          boxShadow: 'var(--shadow-card)',
         }}
       >
         <svg
@@ -231,7 +242,7 @@ export default function DependencyGraphView() {
               markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255, 255, 255, 0.25)" />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
             </marker>
             <marker
               id="arrow-upstream"
@@ -242,7 +253,7 @@ export default function DependencyGraphView() {
               markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f87171" />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
             </marker>
             <marker
               id="arrow-downstream"
@@ -253,7 +264,7 @@ export default function DependencyGraphView() {
               markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4ade80" />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#22c55e" />
             </marker>
           </defs>
 
@@ -266,19 +277,19 @@ export default function DependencyGraphView() {
                   x={20 + idx * 240}
                   y={20}
                   width={200}
-                  height={36}
-                  rx="18"
-                  fill="rgba(255, 255, 255, 0.04)"
-                  stroke={cat.color || '#f5a623'}
-                  strokeWidth="1.5"
+                  height={38}
+                  rx="19"
+                  fill="#ffffff"
+                  stroke={cat.color || '#2951a2'}
+                  strokeWidth="2"
                 />
                 <text
                   x={colCenterX}
-                  y={43}
+                  y={44}
                   textAnchor="middle"
-                  fill={cat.color || '#f5a623'}
-                  fontSize="11"
-                  fontWeight="700"
+                  fill="#122b38"
+                  fontSize="11.5"
+                  fontWeight="800"
                   letterSpacing="0.05em"
                 >
                   {cat.name.toUpperCase()}
@@ -296,18 +307,21 @@ export default function DependencyGraphView() {
               activeFocusId &&
               (conn.fromId === activeFocusId && downstreamSet.has(conn.toId));
 
-            let strokeColor = 'rgba(255, 255, 255, 0.15)';
+            let strokeColor = '#cbd5e1';
             let strokeWidth = 1.5;
             let markerId = 'arrow-default';
+            let strokeDasharray: string | undefined = '4 4';
 
             if (isUpstream) {
-              strokeColor = '#f87171';
-              strokeWidth = 2.5;
+              strokeColor = '#ef4444';
+              strokeWidth = 3;
               markerId = 'arrow-upstream';
+              strokeDasharray = undefined;
             } else if (isDownstream) {
-              strokeColor = '#4ade80';
-              strokeWidth = 2.5;
+              strokeColor = '#22c55e';
+              strokeWidth = 3;
               markerId = 'arrow-downstream';
+              strokeDasharray = undefined;
             }
 
             // Curved cubic bezier line
@@ -321,6 +335,7 @@ export default function DependencyGraphView() {
                 fill="none"
                 stroke={strokeColor}
                 strokeWidth={strokeWidth}
+                strokeDasharray={strokeDasharray}
                 markerEnd={`url(#${markerId})`}
                 style={{ transition: 'stroke 200ms, stroke-width 200ms' }}
               />
@@ -334,21 +349,31 @@ export default function DependencyGraphView() {
             const isUpstream = upstreamSet.has(node.block.id);
             const isDownstream = downstreamSet.has(node.block.id);
 
-            let stroke = 'rgba(255, 255, 255, 0.15)';
-            let fill = 'rgba(26, 26, 46, 0.9)';
+            let stroke = '#cbd5e1';
+            let fill = '#ffffff';
+            let titleColor = '#122b38';
+            let metaColor = '#64748b';
 
             if (isSelected) {
-              stroke = 'var(--accent-primary)';
-              fill = 'rgba(245, 166, 35, 0.15)';
-            } else if (isHovered) {
-              stroke = 'var(--accent-primary)';
-              fill = 'rgba(255, 255, 255, 0.1)';
+              stroke = '#1e40af';
+              fill = '#2951a2';
+              titleColor = '#ffffff';
+              metaColor = '#e0e7ff';
             } else if (isUpstream) {
-              stroke = '#f87171';
-              fill = 'rgba(248, 113, 113, 0.15)';
+              stroke = '#ef4444';
+              fill = '#fef2f2';
+              titleColor = '#991b1b';
+              metaColor = '#b91c1c';
             } else if (isDownstream) {
-              stroke = '#4ade80';
-              fill = 'rgba(74, 222, 128, 0.15)';
+              stroke = '#22c55e';
+              fill = '#f0fdf4';
+              titleColor = '#166534';
+              metaColor = '#15803d';
+            } else if (isHovered) {
+              stroke = '#2951a2';
+              fill = '#f8fafc';
+              titleColor = '#2951a2';
+              metaColor = '#334155';
             }
 
             return (
@@ -368,37 +393,38 @@ export default function DependencyGraphView() {
                   ry="8"
                   fill={fill}
                   stroke={stroke}
-                  strokeWidth={isSelected || isUpstream || isDownstream ? 2 : 1}
+                  strokeWidth={isSelected || isUpstream || isDownstream ? 2.5 : 1.5}
                   style={{ transition: 'all 200ms' }}
                 />
 
                 {/* Left category accent bar */}
                 <rect
-                  width="4"
+                  width="5"
                   height={node.height}
-                  rx="2"
+                  rx="2.5"
                   fill={node.categoryColor}
                 />
 
                 {/* Block Name */}
                 <text
-                  x="14"
+                  x="16"
                   y="26"
-                  fill="var(--text-primary)"
+                  fill={titleColor}
                   fontSize="12"
-                  fontWeight="600"
+                  fontWeight="700"
                 >
-                  {node.block.name.length > 25
-                    ? node.block.name.substring(0, 23) + '…'
+                  {node.block.name.length > 24
+                    ? node.block.name.substring(0, 22) + '…'
                     : node.block.name}
                 </text>
 
                 {/* Meta details */}
                 <text
-                  x="14"
+                  x="16"
                   y="45"
-                  fill="var(--text-tertiary)"
-                  fontSize="10"
+                  fill={metaColor}
+                  fontSize="10.5"
+                  fontWeight="500"
                 >
                   {node.block.devTimeHours > 0 ? `${node.block.devTimeHours}h dev` : '0h'}
                   {node.block.dependencies && node.block.dependencies.length > 0
