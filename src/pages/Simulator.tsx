@@ -242,7 +242,7 @@ export default function Simulator() {
                             {block.name}
                           </span>
                           <span
-                            className={`badge badge-${block.complexity}`}
+                            className={`badge badge-${block.complexity.toLowerCase()}`}
                           >
                             {block.complexity}
                           </span>
@@ -269,11 +269,7 @@ export default function Simulator() {
                               onClick={() => toggleOption(option.id)}
                             >
                               <div className="simulator-option-checkbox">
-                                {isSelected && (
-                                  <span style={{ fontSize: '10px', color: '#0a0a0f' }}>
-                                    ✓
-                                  </span>
-                                )}
+                                {isSelected && <span>✓</span>}
                               </div>
                               {option.name}
                             </button>
@@ -362,8 +358,8 @@ export default function Simulator() {
           </div>
 
           <div className="cost-total">
-            <div className="cost-row" style={{ border: 'none' }}>
-              <span className="cost-row-label font-semibold">Coût total estimé</span>
+            <div className="cost-row" style={{ border: 'none', padding: 0 }}>
+              <span className="cost-row-label font-semibold" style={{ color: '#ffffff' }}>Coût total estimé</span>
               <span className="cost-total-value">
                 {costs.totalCost.toLocaleString('fr-FR')} €
               </span>
@@ -377,6 +373,7 @@ export default function Simulator() {
                 textAlign: 'center',
                 marginTop: 'var(--space-md)',
                 fontStyle: 'italic',
+                color: 'rgba(255, 255, 255, 0.6)',
               }}
             >
               Sélectionnez des options pour voir le chiffrage en temps réel.
@@ -386,159 +383,163 @@ export default function Simulator() {
       </div>
 
       {/* Rates Modal */}
-      <div
-        className={`modal-overlay ${showRatesModal ? 'open' : ''}`}
-        onClick={() => setShowRatesModal(false)}
-      >
-        <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>⚙️ Coûts & Salaires Horaires (Interne)</h3>
-            <button
-              className="btn btn-ghost btn-icon"
-              onClick={() => setShowRatesModal(false)}
-            >
-              ✕
-            </button>
-          </div>
-          <div className="modal-body">
-            <p className="text-xs text-secondary">
-              Définissez les coûts/salaires horaires internes (€/heure) pour chaque rôle afin de calculer automatiquement le coût d'une configuration.
-            </p>
-            <div className="form-group">
-              <label className="form-label">👨‍💻 Coût Horaire Développeur (€/h)</label>
-              <input
-                className="form-input"
-                type="number"
-                min="0"
-                step="5"
-                value={ratesForm.devHourlyRate}
-                onChange={(e) =>
-                  setRatesForm({ ...ratesForm, devHourlyRate: parseFloat(e.target.value) || 0 })
-                }
-              />
+      {showRatesModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowRatesModal(false)}
+        >
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">⚙️ Coûts & Salaires Horaires (Interne)</h3>
+              <button
+                className="btn btn-ghost btn-icon"
+                onClick={() => setShowRatesModal(false)}
+              >
+                ✕
+              </button>
             </div>
-            <div className="form-group">
-              <label className="form-label">💼 Coût Horaire Sales (€/h)</label>
-              <input
-                className="form-input"
-                type="number"
-                min="0"
-                step="5"
-                value={ratesForm.salesHourlyRate}
-                onChange={(e) =>
-                  setRatesForm({ ...ratesForm, salesHourlyRate: parseFloat(e.target.value) || 0 })
-                }
-              />
+            <div className="modal-body">
+              <p className="text-xs text-secondary">
+                Définissez les coûts/salaires horaires internes (€/heure) pour chaque rôle afin de calculer automatiquement le coût d'une configuration.
+              </p>
+              <div className="form-group">
+                <label className="form-label">👨‍💻 Coût Horaire Développeur (€/h)</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  min="0"
+                  step="5"
+                  value={ratesForm.devHourlyRate}
+                  onChange={(e) =>
+                    setRatesForm({ ...ratesForm, devHourlyRate: parseFloat(e.target.value) || 0 })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">💼 Coût Horaire Sales (€/h)</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  min="0"
+                  step="5"
+                  value={ratesForm.salesHourlyRate}
+                  onChange={(e) =>
+                    setRatesForm({ ...ratesForm, salesHourlyRate: parseFloat(e.target.value) || 0 })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">🎨 Coût Horaire Designer (€/h)</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  min="0"
+                  step="5"
+                  value={ratesForm.designHourlyRate}
+                  onChange={(e) =>
+                    setRatesForm({ ...ratesForm, designHourlyRate: parseFloat(e.target.value) || 0 })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">🤝 Coût Horaire CSM (€/h)</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  min="0"
+                  step="5"
+                  value={ratesForm.csmHourlyRate}
+                  onChange={(e) =>
+                    setRatesForm({ ...ratesForm, csmHourlyRate: parseFloat(e.target.value) || 0 })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">📈 Coût Horaire Business Analyst (€/h)</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  min="0"
+                  step="5"
+                  value={ratesForm.baHourlyRate}
+                  onChange={(e) =>
+                    setRatesForm({ ...ratesForm, baHourlyRate: parseFloat(e.target.value) || 0 })
+                  }
+                />
+              </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">🎨 Coût Horaire Designer (€/h)</label>
-              <input
-                className="form-input"
-                type="number"
-                min="0"
-                step="5"
-                value={ratesForm.designHourlyRate}
-                onChange={(e) =>
-                  setRatesForm({ ...ratesForm, designHourlyRate: parseFloat(e.target.value) || 0 })
-                }
-              />
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowRatesModal(false)}
+              >
+                Annuler
+              </button>
+              <button className="btn btn-primary" onClick={handleSaveRates}>
+                Enregistrer les salaires
+              </button>
             </div>
-            <div className="form-group">
-              <label className="form-label">🤝 Coût Horaire CSM (€/h)</label>
-              <input
-                className="form-input"
-                type="number"
-                min="0"
-                step="5"
-                value={ratesForm.csmHourlyRate}
-                onChange={(e) =>
-                  setRatesForm({ ...ratesForm, csmHourlyRate: parseFloat(e.target.value) || 0 })
-                }
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">📈 Coût Horaire Business Analyst (€/h)</label>
-              <input
-                className="form-input"
-                type="number"
-                min="0"
-                step="5"
-                value={ratesForm.baHourlyRate}
-                onChange={(e) =>
-                  setRatesForm({ ...ratesForm, baHourlyRate: parseFloat(e.target.value) || 0 })
-                }
-              />
-            </div>
-          </div>
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              onClick={() => setShowRatesModal(false)}
-            >
-              Annuler
-            </button>
-            <button className="btn btn-primary" onClick={handleSaveRates}>
-              Enregistrer les salaires
-            </button>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Save Modal */}
-      <div
-        className={`modal-overlay ${showSaveModal ? 'open' : ''}`}
-        onClick={() => setShowSaveModal(false)}
-      >
-        <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>Sauvegarder la simulation</h3>
-            <button
-              className="btn btn-ghost btn-icon"
-              onClick={() => setShowSaveModal(false)}
-            >
-              ✕
-            </button>
-          </div>
-          <div className="modal-body">
-            <div className="form-group">
-              <label className="form-label">Nom de la simulation</label>
-              <input
-                className="form-input"
-                placeholder="Ex: Config standard Q4 2026..."
-                value={simulationName}
-                onChange={(e) => setSimulationName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-                autoFocus
-              />
+      {showSaveModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowSaveModal(false)}
+        >
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">Sauvegarder la simulation</h3>
+              <button
+                className="btn btn-ghost btn-icon"
+                onClick={() => setShowSaveModal(false)}
+              >
+                ✕
+              </button>
             </div>
-            <div
-              className="glass-card"
-              style={{ padding: 'var(--space-md)', marginTop: 'var(--space-sm)' }}
-            >
-              <div className="text-xs text-secondary" style={{ marginBottom: 'var(--space-sm)' }}>
-                Résumé
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Nom de la simulation</label>
+                <input
+                  className="form-input"
+                  placeholder="Ex: Config standard Q4 2026..."
+                  value={simulationName}
+                  onChange={(e) => setSimulationName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                  autoFocus
+                />
               </div>
-              <div className="flex justify-between text-sm">
-                <span>{selectedOptionIds.length} options</span>
-                <span className="text-accent font-semibold">
-                  {costs.totalCost.toLocaleString('fr-FR')} €
-                </span>
+              <div
+                className="glass-card"
+                style={{ padding: 'var(--space-md)', marginTop: 'var(--space-sm)' }}
+              >
+                <div className="text-xs text-secondary" style={{ marginBottom: 'var(--space-sm)' }}>
+                  Résumé
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>{selectedOptionIds.length} options</span>
+                  <span className="text-accent font-semibold">
+                    {costs.totalCost.toLocaleString('fr-FR')} €
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              onClick={() => setShowSaveModal(false)}
-            >
-              Annuler
-            </button>
-            <button className="btn btn-primary" onClick={handleSave}>
-              💾 Sauvegarder
-            </button>
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowSaveModal(false)}
+              >
+                Annuler
+              </button>
+              <button className="btn btn-primary" onClick={handleSave}>
+                💾 Sauvegarder
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

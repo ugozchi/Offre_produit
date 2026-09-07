@@ -454,22 +454,25 @@ a:hover {
   letter-spacing: 0.05em;
 }
 
-.badge-simple {
-  background: rgba(16, 185, 129, 0.1);
+.badge-simple,
+.badge-SIMPLE {
+  background: rgba(16, 185, 129, 0.12);
   color: var(--color-simple);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.badge-moyen {
-  background: rgba(245, 158, 11, 0.1);
+.badge-moyen,
+.badge-MOYEN {
+  background: rgba(245, 158, 11, 0.12);
   color: var(--color-moyen);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-.badge-complexe {
-  background: rgba(239, 68, 68, 0.1);
+.badge-complexe,
+.badge-COMPLEXE {
+  background: rgba(239, 68, 68, 0.12);
   color: var(--color-complexe);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 /* ---- Stats Cards ---- */
@@ -777,27 +780,191 @@ a:hover {
   align-items: start;
 }
 
+@media (max-width: 1024px) {
+  .simulator-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.simulator-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.simulator-category {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.category-color-bar {
+  width: 4px;
+  height: 20px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.category-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.simulator-block {
+  background: #f8fafc;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.simulator-block:last-child {
+  margin-bottom: 0;
+}
+
+.simulator-block.selected {
+  background: #ffffff;
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 12px rgba(41, 81, 162, 0.08);
+}
+
+.simulator-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.simulator-block-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.simulator-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.simulator-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.simulator-option:hover {
+  border-color: var(--accent-primary);
+  background: #f1f5f9;
+  color: var(--accent-primary);
+}
+
+.simulator-option.selected {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(41, 81, 162, 0.25);
+}
+
+.simulator-option-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  transition: all 0.15s ease;
+  background: #ffffff;
+  color: var(--text-primary);
+}
+
+.simulator-option.selected .simulator-option-checkbox {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: var(--accent-primary);
+}
+
+/* Cost Summary Panel */
+.cost-summary,
 .simulator-summary {
   background: var(--bg-dark-navy);
   color: #ffffff;
   border-radius: var(--radius-xl);
-  padding: 28px;
+  padding: 24px;
   box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   position: sticky;
   top: calc(var(--header-height) + 24px);
 }
 
-.simulator-summary h3 {
+.cost-summary-title {
+  font-size: 1.15rem;
+  font-weight: 700;
   color: #ffffff;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.simulator-total-cost {
-  font-size: 2.2rem;
-  font-weight: 800;
+.cost-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.875rem;
+}
+
+.cost-row-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.cost-row-value {
   color: #ffffff;
-  margin-bottom: 20px;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+.cost-total {
+  margin-top: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.cost-total-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #60a5fa;
 }
 
 /* ---- Drawer ---- */
