@@ -4,6 +4,7 @@
 
 import { NavLink, useLocation, Outlet } from 'react-router-dom';
 import { useAppStore } from '../store/AppContext';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 export default function Layout() {
   const { state } = useAppStore();
@@ -110,7 +111,7 @@ export default function Layout() {
             color: 'var(--text-tertiary)',
           }}
         >
-          v1.0 — Mode local
+          {isSupabaseConfigured ? 'v1.0 — Cloud Sync (Supabase)' : 'v1.0 — Mode local'}
         </div>
       </aside>
 
@@ -129,16 +130,29 @@ export default function Layout() {
             )}
           </div>
           <div className="flex items-center gap-sm">
-            <span
-              className="badge"
-              style={{
-                background: 'rgba(74, 222, 128, 0.1)',
-                color: 'var(--color-simple)',
-                border: '1px solid rgba(74, 222, 128, 0.2)',
-              }}
-            >
-              ● Local
-            </span>
+            {isSupabaseConfigured ? (
+              <span
+                className="badge"
+                style={{
+                  background: 'rgba(74, 222, 128, 0.15)',
+                  color: '#4ade80',
+                  border: '1px solid rgba(74, 222, 128, 0.3)',
+                }}
+              >
+                ● Cloud Sync (Supabase)
+              </span>
+            ) : (
+              <span
+                className="badge"
+                style={{
+                  background: 'rgba(250, 204, 21, 0.15)',
+                  color: '#facc15',
+                  border: '1px solid rgba(250, 204, 21, 0.3)',
+                }}
+              >
+                ● Mode Local
+              </span>
+            )}
           </div>
         </header>
 

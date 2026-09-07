@@ -4,7 +4,12 @@ import type { Product, Category, ConfigBlock, Option, Simulation, RoleHourlyRate
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+export const isSupabaseConfigured = Boolean(
+  supabaseUrl &&
+    supabaseAnonKey &&
+    supabaseUrl !== 'https://votre-projet.supabase.co' &&
+    !supabaseUrl.includes('votre-projet')
+);
 
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
@@ -33,8 +38,14 @@ export async function fetchStateFromSupabase(): Promise<FullAppState | null> {
       supabase.from('role_rates').select('*').maybeSingle(),
     ]);
 
-    if (productsRes.error) {
-      console.warn('[Supabase] Error fetching products:', productsRes.error);
+    if (productsRes.error || catRes.error || blocksRes.error || optionsRes.error || simRes.error) {
+      console.warn('[Supabase] Error fetching state:', {
+        productsError: productsRes.error,
+        categoriesError: catRes.error,
+        blocksError: blocksRes.error,
+        optionsError: optionsRes.error,
+        simulationsError: simRes.error,
+      });
       return null;
     }
 
@@ -119,6 +130,7 @@ export async function fetchStateFromSupabase(): Promise<FullAppState | null> {
           baHourlyRate: 55,
         };
 
+    console.log('[Supabase] Successfully fetched remote state:', { productsCount: products.length, simulationsCount: simulations.length });
     return { products, categories, blocks, options, simulations, rates };
   } catch (err) {
     console.error('[Supabase] Failed to fetch state:', err);
@@ -134,10 +146,10 @@ export async function seedSupabaseIfEmpty(state: FullAppState) {
     const { count } = await supabase.from('products').select('*', { count: 'exact', head: true });
     if (count !== null && count > 0) return; // Database already populated
 
-    console.log('[Supabase] Seeding database with initial state...');
+    console.log('[Supabase] Database empty. Seeding initial state...');
 
     if (state.products.length > 0) {
-      await supabase.from('products').insert(
+      const { error } = await supabase.from('products').insert(
         state.products.map((p) => ({
           id: p.id,
           name: p.name,
@@ -147,10 +159,11 @@ export async function seedSupabaseIfEmpty(state: FullAppState) {
           updated_at: p.updatedAt,
         }))
       );
+      if (error) console.error('[Supabase] Error seeding products:', error);
     }
 
     if (state.categories.length > 0) {
-      await supabase.from('categories').insert(
+      const { error } = await supabase.from('categories').insert(
         state.categories.map((c) => ({
           id: c.id,
           product_id: c.productId,
@@ -159,10 +172,11 @@ export async function seedSupabaseIfEmpty(state: FullAppState) {
           sort_order: c.sortOrder,
         }))
       );
+      if (error) console.error('[Supabase] Error seeding categories:', error);
     }
 
     if (state.blocks.length > 0) {
-      await supabase.from('config_blocks').insert(
+      const { error } = await supabase.from('config_blocks').insert(
         state.blocks.map((b) => ({
           id: b.id,
           category_id: b.categoryId,
@@ -180,10 +194,11 @@ export async function seedSupabaseIfEmpty(state: FullAppState) {
           sort_order: b.sortOrder,
         }))
       );
+      if (error) console.error('[Supabase] Error seeding blocks:', error);
     }
 
     if (state.options.length > 0) {
-      await supabase.from('options').insert(
+      const { error } = await supabase.from('options').insert(
         state.options.map((o) => ({
           id: o.id,
           block_id: o.blockId,
@@ -199,10 +214,11 @@ export async function seedSupabaseIfEmpty(state: FullAppState) {
           sort_order: o.sortOrder,
         }))
       );
+      if (error) console.error('[Supabase] Error seeding options:', error);
     }
 
     if (state.rates) {
-      await supabase.from('role_rates').upsert({
+      const { error } = await supabase.from('role_rates').upsert({
         id: 'default',
         dev_hourly_rate: state.rates.devHourlyRate,
         sales_hourly_rate: state.rates.salesHourlyRate,
@@ -210,9 +226,10 @@ export async function seedSupabaseIfEmpty(state: FullAppState) {
         csm_hourly_rate: state.rates.csmHourlyRate,
         ba_hourly_rate: state.rates.baHourlyRate,
       });
+      if (error) console.error('[Supabase] Error seeding rates:', error);
     }
 
-    console.log('[Supabase] Initial seeding done!');
+    console.log('[Supabase] Initial seeding complete!');
   } catch (err) {
     console.error('[Supabase] Seeding failed:', err);
   }
@@ -221,7 +238,7 @@ export async function seedSupabaseIfEmpty(state: FullAppState) {
 // ---- Granular sync operations ----
 export async function dbUpsertProduct(p: Product) {
   if (!supabase) return;
-  await supabase.from('products').upsert({
+  const { error } = await supabase.from('products').upsert({
     id: p.id,
     name: p.name,
     description: p.description,
@@ -229,32 +246,36 @@ export async function dbUpsertProduct(p: Product) {
     created_at: p.createdAt,
     updated_at: p.updatedAt,
   });
+  if (error) console.error('[Supabase] dbUpsertProduct failed:', error);
 }
 
 export async function dbDeleteProduct(id: string) {
   if (!supabase) return;
-  await supabase.from('products').delete().eq('id', id);
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) console.error('[Supabase] dbDeleteProduct failed:', error);
 }
 
 export async function dbUpsertCategory(c: Category) {
   if (!supabase) return;
-  await supabase.from('categories').upsert({
+  const { error } = await supabase.from('categories').upsert({
     id: c.id,
     product_id: c.productId,
     name: c.name,
     color: c.color,
     sort_order: c.sortOrder,
   });
+  if (error) console.error('[Supabase] dbUpsertCategory failed:', error);
 }
 
 export async function dbDeleteCategory(id: string) {
   if (!supabase) return;
-  await supabase.from('categories').delete().eq('id', id);
+  const { error } = await supabase.from('categories').delete().eq('id', id);
+  if (error) console.error('[Supabase] dbDeleteCategory failed:', error);
 }
 
 export async function dbUpsertBlock(b: ConfigBlock) {
   if (!supabase) return;
-  await supabase.from('config_blocks').upsert({
+  const { error } = await supabase.from('config_blocks').upsert({
     id: b.id,
     category_id: b.categoryId,
     name: b.name,
@@ -270,16 +291,18 @@ export async function dbUpsertBlock(b: ConfigBlock) {
     notes: b.notes,
     sort_order: b.sortOrder,
   });
+  if (error) console.error('[Supabase] dbUpsertBlock failed:', error);
 }
 
 export async function dbDeleteBlock(id: string) {
   if (!supabase) return;
-  await supabase.from('config_blocks').delete().eq('id', id);
+  const { error } = await supabase.from('config_blocks').delete().eq('id', id);
+  if (error) console.error('[Supabase] dbDeleteBlock failed:', error);
 }
 
 export async function dbUpsertOption(o: Option) {
   if (!supabase) return;
-  await supabase.from('options').upsert({
+  const { error } = await supabase.from('options').upsert({
     id: o.id,
     block_id: o.blockId,
     name: o.name,
@@ -293,16 +316,18 @@ export async function dbUpsertOption(o: Option) {
     is_default: o.isDefault,
     sort_order: o.sortOrder,
   });
+  if (error) console.error('[Supabase] dbUpsertOption failed:', error);
 }
 
 export async function dbDeleteOption(id: string) {
   if (!supabase) return;
-  await supabase.from('options').delete().eq('id', id);
+  const { error } = await supabase.from('options').delete().eq('id', id);
+  if (error) console.error('[Supabase] dbDeleteOption failed:', error);
 }
 
 export async function dbUpsertSimulation(s: Simulation) {
   if (!supabase) return;
-  await supabase.from('simulations').upsert({
+  const { error } = await supabase.from('simulations').upsert({
     id: s.id,
     product_id: s.productId,
     name: s.name,
@@ -316,16 +341,18 @@ export async function dbUpsertSimulation(s: Simulation) {
     total_production_cost: s.totalProductionCost,
     created_at: s.createdAt,
   });
+  if (error) console.error('[Supabase] dbUpsertSimulation failed:', error);
 }
 
 export async function dbDeleteSimulation(id: string) {
   if (!supabase) return;
-  await supabase.from('simulations').delete().eq('id', id);
+  const { error } = await supabase.from('simulations').delete().eq('id', id);
+  if (error) console.error('[Supabase] dbDeleteSimulation failed:', error);
 }
 
 export async function dbUpsertRates(rates: RoleHourlyRates) {
   if (!supabase) return;
-  await supabase.from('role_rates').upsert({
+  const { error } = await supabase.from('role_rates').upsert({
     id: 'default',
     dev_hourly_rate: rates.devHourlyRate,
     sales_hourly_rate: rates.salesHourlyRate,
@@ -333,12 +360,14 @@ export async function dbUpsertRates(rates: RoleHourlyRates) {
     csm_hourly_rate: rates.csmHourlyRate,
     ba_hourly_rate: rates.baHourlyRate,
   });
+  if (error) console.error('[Supabase] dbUpsertRates failed:', error);
 }
 
-// ---- Realtime subscription ----
+// ---- Realtime subscription + Polling fallback ----
 export function subscribeToSupabase(onStateChange: (newState: FullAppState) => void) {
   if (!supabase) return () => {};
 
+  // 1. Realtime subscription
   const channel = supabase
     .channel('app-db-changes')
     .on('postgres_changes', { event: '*', schema: 'public' }, () => {
@@ -350,7 +379,28 @@ export function subscribeToSupabase(onStateChange: (newState: FullAppState) => v
     })
     .subscribe();
 
+  // 2. Window focus refetch fallback
+  const handleFocus = () => {
+    fetchStateFromSupabase().then((remoteState) => {
+      if (remoteState) {
+        onStateChange(remoteState);
+      }
+    });
+  };
+  window.addEventListener('focus', handleFocus);
+
+  // 3. Periodic 5-second polling fallback
+  const interval = setInterval(() => {
+    fetchStateFromSupabase().then((remoteState) => {
+      if (remoteState) {
+        onStateChange(remoteState);
+      }
+    });
+  }, 5000);
+
   return () => {
     supabase.removeChannel(channel);
+    window.removeEventListener('focus', handleFocus);
+    clearInterval(interval);
   };
 }
