@@ -277,11 +277,13 @@ export default function ProductView() {
       )}
 
       {/* ==== DRAWER ==== */}
-      <div
-        className={`drawer-overlay ${selectedBlock ? 'open' : ''}`}
-        onClick={() => setSelectedBlock(null)}
-      />
-      <div className={`drawer ${selectedBlock ? 'open' : ''}`}>
+      {selectedBlock && (
+        <>
+          <div
+            className="drawer-overlay"
+            onClick={() => setSelectedBlock(null)}
+          />
+          <div className="drawer-content">
         {selectedBlock && editBlock && (
           <>
             <div className="drawer-header">
@@ -905,110 +907,110 @@ export default function ProductView() {
             </div>
           </>
         )}
-      </div>
+          </div>
+        </>
+      )}
 
       {/* ==== Add Block Modal ==== */}
-      <div
-        className={`modal-overlay ${showAddBlock ? 'open' : ''}`}
-        onClick={() => setShowAddBlock(false)}
-      >
-        <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>Nouveau Bloc</h3>
-            <button
-              className="btn btn-ghost btn-icon"
-              onClick={() => setShowAddBlock(false)}
-            >
-              ✕
-            </button>
-          </div>
-          <div className="modal-body">
-            <div className="form-group">
-              <label className="form-label">Nom du bloc</label>
-              <input
-                className="form-input"
-                placeholder="Ex: Type de Bannière, Module vidéo..."
-                value={newBlockName}
-                onChange={(e) => setNewBlockName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddBlock()}
-                autoFocus
-              />
+      {showAddBlock && (
+        <div className="modal-overlay" onClick={() => setShowAddBlock(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">Nouveau Bloc</h3>
+              <button
+                className="btn btn-ghost btn-icon"
+                onClick={() => setShowAddBlock(false)}
+              >
+                ✕
+              </button>
             </div>
-          </div>
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              onClick={() => setShowAddBlock(false)}
-            >
-              Annuler
-            </button>
-            <button className="btn btn-primary" onClick={handleAddBlock}>
-              Ajouter
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ==== Add Category Modal ==== */}
-      <div
-        className={`modal-overlay ${showAddCategory ? 'open' : ''}`}
-        onClick={() => setShowAddCategory(false)}
-      >
-        <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>Nouvelle Catégorie</h3>
-            <button
-              className="btn btn-ghost btn-icon"
-              onClick={() => setShowAddCategory(false)}
-            >
-              ✕
-            </button>
-          </div>
-          <div className="modal-body">
-            <div className="form-group">
-              <label className="form-label">Nom de la catégorie</label>
-              <input
-                className="form-input"
-                placeholder="Ex: Paramétrages Communs..."
-                value={newCatName}
-                onChange={(e) => setNewCatName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
-                autoFocus
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Couleur</label>
-              <div className="flex gap-sm items-center">
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Nom du bloc</label>
                 <input
-                  type="color"
-                  value={newCatColor}
-                  onChange={(e) => setNewCatColor(e.target.value)}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    border: 'none',
-                    borderRadius: 'var(--radius-md)',
-                    cursor: 'pointer',
-                    background: 'transparent',
-                  }}
+                  className="form-input"
+                  placeholder="Ex: Type de Bannière, Module vidéo..."
+                  value={newBlockName}
+                  onChange={(e) => setNewBlockName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddBlock()}
+                  autoFocus
                 />
-                <span className="text-sm text-secondary">{newCatColor}</span>
               </div>
             </div>
-          </div>
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              onClick={() => setShowAddCategory(false)}
-            >
-              Annuler
-            </button>
-            <button className="btn btn-primary" onClick={handleAddCategory}>
-              Ajouter
-            </button>
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowAddBlock(false)}
+              >
+                Annuler
+              </button>
+              <button className="btn btn-primary" onClick={handleAddBlock}>
+                Ajouter
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* ==== Add Category Modal ==== */}
+      {showAddCategory && (
+        <div className="modal-overlay" onClick={() => setShowAddCategory(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">Nouvelle Catégorie</h3>
+              <button
+                className="btn btn-ghost btn-icon"
+                onClick={() => setShowAddCategory(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Nom de la catégorie</label>
+                <input
+                  className="form-input"
+                  placeholder="Ex: Paramétrages Communs..."
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
+                  autoFocus
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Couleur</label>
+                <div className="flex gap-sm items-center">
+                  <input
+                    type="color"
+                    value={newCatColor}
+                    onChange={(e) => setNewCatColor(e.target.value)}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      border: 'none',
+                      borderRadius: 'var(--radius-md)',
+                      cursor: 'pointer',
+                      background: 'transparent',
+                    }}
+                  />
+                  <span className="text-sm text-secondary">{newCatColor}</span>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowAddCategory(false)}
+              >
+                Annuler
+              </button>
+              <button className="btn btn-primary" onClick={handleAddCategory}>
+                Ajouter
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -412,128 +412,132 @@ export default function DependencyGraphView() {
       </div>
 
       {/* Impact & Process Analytics Drawer */}
-      <div
-        className={`drawer-overlay ${selectedBlock ? 'open' : ''}`}
-        onClick={() => setSelectedBlock(null)}
-      />
-      <div className={`drawer ${selectedBlock ? 'open' : ''}`}>
-        {selectedBlock && selectedMetrics && (
-          <>
-            <div className="drawer-header">
-              <div>
-                <h3>Analyse d'Impact Processus</h3>
-                <span className="text-xs text-accent font-semibold">
-                  {selectedBlock.name}
-                </span>
-              </div>
-              <button
-                className="btn btn-ghost btn-icon"
-                onClick={() => setSelectedBlock(null)}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="drawer-body">
-              <p className="text-sm text-secondary" style={{ marginBottom: 'var(--space-lg)' }}>
-                {selectedBlock.description || 'Aucune description renseignée pour ce bloc.'}
-              </p>
-
-              {/* Impact Score Card */}
-              <div
-                className="glass-card"
-                style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-lg)' }}
-              >
-                <div className="flex justify-between items-center" style={{ marginBottom: 'var(--space-xs)' }}>
-                  <span className="form-label text-xs">Score d'Impact sur l'Offre</span>
-                  <span className="text-accent font-bold">{selectedMetrics.impactScore}%</span>
+      {selectedBlock && (
+        <>
+          <div
+            className="drawer-overlay"
+            onClick={() => setSelectedBlock(null)}
+          />
+          <div className="drawer-content">
+            {selectedMetrics && (
+              <>
+                <div className="drawer-header">
+                  <div>
+                    <h3>Analyse d'Impact Processus</h3>
+                    <span className="text-xs text-accent font-semibold">
+                      {selectedBlock.name}
+                    </span>
+                  </div>
+                  <button
+                    className="btn btn-ghost btn-icon"
+                    onClick={() => setSelectedBlock(null)}
+                  >
+                    ✕
+                  </button>
                 </div>
-                <div
-                  style={{
-                    height: 8,
-                    background: 'var(--bg-glass)',
-                    borderRadius: 'var(--radius-full)',
-                    overflow: 'hidden',
-                    marginBottom: 'var(--space-sm)',
-                  }}
-                >
+
+                <div className="drawer-body">
+                  <p className="text-sm text-secondary" style={{ marginBottom: 'var(--space-lg)' }}>
+                    {selectedBlock.description || 'Aucune description renseignée pour ce bloc.'}
+                  </p>
+
+                  {/* Impact Score Card */}
                   <div
-                    style={{
-                      height: '100%',
-                      width: `${selectedMetrics.impactScore}%`,
-                      background: 'var(--accent-gradient)',
-                      borderRadius: 'var(--radius-full)',
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-secondary">
-                  {selectedMetrics.impactScore > 20
-                    ? '⚠️ Bloc Pilier : Une grande partie de votre offre dépend directement ou indirectement de ce bloc.'
-                    : 'ℹ️ Bloc périphérique : Son impact sur le reste de la chaîne de production est limité.'}
-                </p>
-              </div>
+                    className="glass-card"
+                    style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-lg)' }}
+                  >
+                    <div className="flex justify-between items-center" style={{ marginBottom: 'var(--space-xs)' }}>
+                      <span className="form-label text-xs">Score d'Impact sur l'Offre</span>
+                      <span className="text-accent font-bold">{selectedMetrics.impactScore}%</span>
+                    </div>
+                    <div
+                      style={{
+                        height: 8,
+                        background: 'var(--bg-glass)',
+                        borderRadius: 'var(--radius-full)',
+                        overflow: 'hidden',
+                        marginBottom: 'var(--space-sm)',
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${selectedMetrics.impactScore}%`,
+                          background: 'var(--accent-gradient)',
+                          borderRadius: 'var(--radius-full)',
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-secondary">
+                      {selectedMetrics.impactScore > 20
+                        ? '⚠️ Bloc Pilier : Une grande partie de votre offre dépend directement ou indirectement de ce bloc.'
+                        : 'ℹ️ Bloc périphérique : Son impact sur le reste de la chaîne de production est limité.'}
+                    </p>
+                  </div>
 
-              {/* Dependency Metrics Grid */}
-              <div className="info-grid" style={{ marginBottom: 'var(--space-lg)' }}>
-                <div className="info-item">
-                  <span className="info-item-label">🔗 Dépendances Amont</span>
-                  <span className="info-item-value cost">
-                    {selectedBlock.dependencies?.length || 0} bloc(s) requis
-                  </span>
-                </div>
-                <div className="info-item">
-                  <span className="info-item-label">⚡ Bloc Aval Débloqués</span>
-                  <span className="info-item-value cost">
-                    {selectedMetrics.totalDependentsCount} bloc(s) impacté(s)
-                  </span>
-                </div>
-              </div>
+                  {/* Dependency Metrics Grid */}
+                  <div className="info-grid" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div className="info-item">
+                      <span className="info-item-label">🔗 Dépendances Amont</span>
+                      <span className="info-item-value cost">
+                        {selectedBlock.dependencies?.length || 0} bloc(s) requis
+                      </span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-item-label">⚡ Bloc Aval Débloqués</span>
+                      <span className="info-item-value cost">
+                        {selectedMetrics.totalDependentsCount} bloc(s) impacté(s)
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Workload Breakdown */}
-              <div className="form-label" style={{ marginBottom: 'var(--space-sm)' }}>
-                ⏱️ Charge Totale Directe du Bloc
-              </div>
-              <div className="options-list" style={{ marginBottom: 'var(--space-lg)' }}>
-                <div className="option-item">
-                  <span className="option-name">👨‍💻 Développement</span>
-                  <span className="option-cost">{selectedBlock.devTimeHours || 0} h</span>
+                  {/* Workload Breakdown */}
+                  <div className="form-label" style={{ marginBottom: 'var(--space-sm)' }}>
+                    ⏱️ Charge Totale Directe du Bloc
+                  </div>
+                  <div className="options-list" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div className="option-item">
+                      <span className="option-name">👨‍💻 Développement</span>
+                      <span className="option-cost">{selectedBlock.devTimeHours || 0} h</span>
+                    </div>
+                    <div className="option-item">
+                      <span className="option-name">💼 Sales</span>
+                      <span className="option-cost">{selectedBlock.salesTimeHours || 0} h</span>
+                    </div>
+                    <div className="option-item">
+                      <span className="option-name">🎨 Design</span>
+                      <span className="option-cost">{selectedBlock.designTimeHours || 0} h</span>
+                    </div>
+                    <div className="option-item">
+                      <span className="option-name">🤝 CSM</span>
+                      <span className="option-cost">{selectedBlock.csmTimeHours || 0} h</span>
+                    </div>
+                    <div className="option-item">
+                      <span className="option-name">📈 Business Analyst</span>
+                      <span className="option-cost">{selectedBlock.baTimeHours || 0} h</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="option-item">
-                  <span className="option-name">💼 Sales</span>
-                  <span className="option-cost">{selectedBlock.salesTimeHours || 0} h</span>
-                </div>
-                <div className="option-item">
-                  <span className="option-name">🎨 Design</span>
-                  <span className="option-cost">{selectedBlock.designTimeHours || 0} h</span>
-                </div>
-                <div className="option-item">
-                  <span className="option-name">🤝 CSM</span>
-                  <span className="option-cost">{selectedBlock.csmTimeHours || 0} h</span>
-                </div>
-                <div className="option-item">
-                  <span className="option-name">📈 Business Analyst</span>
-                  <span className="option-cost">{selectedBlock.baTimeHours || 0} h</span>
-                </div>
-              </div>
-            </div>
 
-            <div className="drawer-footer">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setSelectedBlock(null)}
-              >
-                Fermer
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => navigate(`/product/${productId}`)}
-              >
-                ✏️ Modifier dans l'Arborescence
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+                <div className="drawer-footer">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setSelectedBlock(null)}
+                  >
+                    Fermer
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => navigate(`/product/${productId}`)}
+                  >
+                    ✏️ Modifier dans l'Arborescence
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
     </>
   );
 }
