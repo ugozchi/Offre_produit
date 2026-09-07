@@ -218,162 +218,121 @@ export async function seedSupabaseIfEmpty(state: FullAppState) {
   }
 }
 
-// ---- Sync helper for state mutations ----
-export async function syncStateToSupabase(state: FullAppState) {
+// ---- Granular sync operations ----
+export async function dbUpsertProduct(p: Product) {
   if (!supabase) return;
+  await supabase.from('products').upsert({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    icon: p.icon,
+    created_at: p.createdAt,
+    updated_at: p.updatedAt,
+  });
+}
 
-  try {
-    // 1. Upsert products
-    for (const p of state.products) {
-      await supabase.from('products').upsert({
-        id: p.id,
-        name: p.name,
-        description: p.description,
-        icon: p.icon,
-        created_at: p.createdAt,
-        updated_at: p.updatedAt,
-      });
-    }
+export async function dbDeleteProduct(id: string) {
+  if (!supabase) return;
+  await supabase.from('products').delete().eq('id', id);
+}
 
-    // Delete removed products
-    const prodIds = state.products.map((p) => p.id);
-    if (prodIds.length > 0) {
-      const { data: dbProds } = await supabase.from('products').select('id');
-      if (dbProds) {
-        const toDelete = dbProds.filter((p) => !prodIds.includes(p.id)).map((p) => p.id);
-        if (toDelete.length > 0) {
-          await supabase.from('products').delete().in('id', toDelete);
-        }
-      }
-    }
+export async function dbUpsertCategory(c: Category) {
+  if (!supabase) return;
+  await supabase.from('categories').upsert({
+    id: c.id,
+    product_id: c.productId,
+    name: c.name,
+    color: c.color,
+    sort_order: c.sortOrder,
+  });
+}
 
-    // 2. Upsert categories
-    for (const c of state.categories) {
-      await supabase.from('categories').upsert({
-        id: c.id,
-        product_id: c.productId,
-        name: c.name,
-        color: c.color,
-        sort_order: c.sortOrder,
-      });
-    }
+export async function dbDeleteCategory(id: string) {
+  if (!supabase) return;
+  await supabase.from('categories').delete().eq('id', id);
+}
 
-    // Delete removed categories
-    const catIds = state.categories.map((c) => c.id);
-    if (catIds.length > 0) {
-      const { data: dbCats } = await supabase.from('categories').select('id');
-      if (dbCats) {
-        const toDelete = dbCats.filter((c) => !catIds.includes(c.id)).map((c) => c.id);
-        if (toDelete.length > 0) {
-          await supabase.from('categories').delete().in('id', toDelete);
-        }
-      }
-    }
+export async function dbUpsertBlock(b: ConfigBlock) {
+  if (!supabase) return;
+  await supabase.from('config_blocks').upsert({
+    id: b.id,
+    category_id: b.categoryId,
+    name: b.name,
+    description: b.description,
+    dev_time_hours: b.devTimeHours,
+    sales_time_hours: b.salesTimeHours,
+    design_time_hours: b.designTimeHours,
+    csm_time_hours: b.csmTimeHours,
+    ba_time_hours: b.baTimeHours,
+    infra_cost_monthly: b.infraCostMonthly,
+    complexity: b.complexity,
+    dependencies: b.dependencies,
+    notes: b.notes,
+    sort_order: b.sortOrder,
+  });
+}
 
-    // 3. Upsert blocks
-    for (const b of state.blocks) {
-      await supabase.from('config_blocks').upsert({
-        id: b.id,
-        category_id: b.categoryId,
-        name: b.name,
-        description: b.description,
-        dev_time_hours: b.devTimeHours,
-        sales_time_hours: b.salesTimeHours,
-        design_time_hours: b.designTimeHours,
-        csm_time_hours: b.csmTimeHours,
-        ba_time_hours: b.baTimeHours,
-        infra_cost_monthly: b.infraCostMonthly,
-        complexity: b.complexity,
-        dependencies: b.dependencies,
-        notes: b.notes,
-        sort_order: b.sortOrder,
-      });
-    }
+export async function dbDeleteBlock(id: string) {
+  if (!supabase) return;
+  await supabase.from('config_blocks').delete().eq('id', id);
+}
 
-    // Delete removed blocks
-    const blockIds = state.blocks.map((b) => b.id);
-    if (blockIds.length > 0) {
-      const { data: dbBlocks } = await supabase.from('config_blocks').select('id');
-      if (dbBlocks) {
-        const toDelete = dbBlocks.filter((b) => !blockIds.includes(b.id)).map((b) => b.id);
-        if (toDelete.length > 0) {
-          await supabase.from('config_blocks').delete().in('id', toDelete);
-        }
-      }
-    }
+export async function dbUpsertOption(o: Option) {
+  if (!supabase) return;
+  await supabase.from('options').upsert({
+    id: o.id,
+    block_id: o.blockId,
+    name: o.name,
+    dev_time_hours: o.devTimeHours,
+    sales_time_hours: o.salesTimeHours,
+    design_time_hours: o.designTimeHours,
+    csm_time_hours: o.csmTimeHours,
+    ba_time_hours: o.baTimeHours,
+    infra_cost_monthly: o.infraCostMonthly,
+    production_cost: o.productionCost,
+    is_default: o.isDefault,
+    sort_order: o.sortOrder,
+  });
+}
 
-    // 4. Upsert options
-    for (const o of state.options) {
-      await supabase.from('options').upsert({
-        id: o.id,
-        block_id: o.blockId,
-        name: o.name,
-        dev_time_hours: o.devTimeHours,
-        sales_time_hours: o.salesTimeHours,
-        design_time_hours: o.designTimeHours,
-        csm_time_hours: o.csmTimeHours,
-        ba_time_hours: o.baTimeHours,
-        infra_cost_monthly: o.infraCostMonthly,
-        production_cost: o.productionCost,
-        is_default: o.isDefault,
-        sort_order: o.sortOrder,
-      });
-    }
+export async function dbDeleteOption(id: string) {
+  if (!supabase) return;
+  await supabase.from('options').delete().eq('id', id);
+}
 
-    // Delete removed options
-    const optionIds = state.options.map((o) => o.id);
-    if (optionIds.length > 0) {
-      const { data: dbOptions } = await supabase.from('options').select('id');
-      if (dbOptions) {
-        const toDelete = dbOptions.filter((o) => !optionIds.includes(o.id)).map((o) => o.id);
-        if (toDelete.length > 0) {
-          await supabase.from('options').delete().in('id', toDelete);
-        }
-      }
-    }
+export async function dbUpsertSimulation(s: Simulation) {
+  if (!supabase) return;
+  await supabase.from('simulations').upsert({
+    id: s.id,
+    product_id: s.productId,
+    name: s.name,
+    selected_option_ids: s.selectedOptionIds,
+    total_dev_hours: s.totalDevHours,
+    total_sales_hours: s.totalSalesHours,
+    total_design_hours: s.totalDesignHours,
+    total_csm_hours: s.totalCsmHours,
+    total_ba_hours: s.totalBaHours,
+    total_infra_cost: s.totalInfraCost,
+    total_production_cost: s.totalProductionCost,
+    created_at: s.createdAt,
+  });
+}
 
-    // 5. Upsert simulations
-    for (const s of state.simulations) {
-      await supabase.from('simulations').upsert({
-        id: s.id,
-        product_id: s.productId,
-        name: s.name,
-        selected_option_ids: s.selectedOptionIds,
-        total_dev_hours: s.totalDevHours,
-        total_sales_hours: s.totalSalesHours,
-        total_design_hours: s.totalDesignHours,
-        total_csm_hours: s.totalCsmHours,
-        total_ba_hours: s.totalBaHours,
-        total_infra_cost: s.totalInfraCost,
-        total_production_cost: s.totalProductionCost,
-        created_at: s.createdAt,
-      });
-    }
+export async function dbDeleteSimulation(id: string) {
+  if (!supabase) return;
+  await supabase.from('simulations').delete().eq('id', id);
+}
 
-    // Delete removed simulations
-    const simIds = state.simulations.map((s) => s.id);
-    const { data: dbSims } = await supabase.from('simulations').select('id');
-    if (dbSims) {
-      const toDelete = dbSims.filter((s) => !simIds.includes(s.id)).map((s) => s.id);
-      if (toDelete.length > 0) {
-        await supabase.from('simulations').delete().in('id', toDelete);
-      }
-    }
-
-    // 6. Upsert rates
-    if (state.rates) {
-      await supabase.from('role_rates').upsert({
-        id: 'default',
-        dev_hourly_rate: state.rates.devHourlyRate,
-        sales_hourly_rate: state.rates.salesHourlyRate,
-        design_hourly_rate: state.rates.designHourlyRate,
-        csm_hourly_rate: state.rates.csmHourlyRate,
-        ba_hourly_rate: state.rates.baHourlyRate,
-      });
-    }
-  } catch (err) {
-    console.error('[Supabase] Sync failed:', err);
-  }
+export async function dbUpsertRates(rates: RoleHourlyRates) {
+  if (!supabase) return;
+  await supabase.from('role_rates').upsert({
+    id: 'default',
+    dev_hourly_rate: rates.devHourlyRate,
+    sales_hourly_rate: rates.salesHourlyRate,
+    design_hourly_rate: rates.designHourlyRate,
+    csm_hourly_rate: rates.csmHourlyRate,
+    ba_hourly_rate: rates.baHourlyRate,
+  });
 }
 
 // ---- Realtime subscription ----

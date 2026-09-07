@@ -16,8 +16,18 @@ import {
   isSupabaseConfigured,
   fetchStateFromSupabase,
   seedSupabaseIfEmpty,
-  syncStateToSupabase,
   subscribeToSupabase,
+  dbUpsertProduct,
+  dbDeleteProduct,
+  dbUpsertCategory,
+  dbDeleteCategory,
+  dbUpsertBlock,
+  dbDeleteBlock,
+  dbUpsertOption,
+  dbDeleteOption,
+  dbUpsertSimulation,
+  dbDeleteSimulation,
+  dbUpsertRates,
 } from '../lib/supabase';
 
 // ---- State ----
@@ -101,33 +111,35 @@ function appReducer(state: AppState, action: Action): AppState {
   let newState: AppState;
 
   switch (action.type) {
-    case 'ADD_PRODUCT':
+    case 'ADD_PRODUCT': {
+      const newProduct: Product = {
+        ...action.payload,
+        id: uuidv4(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
       newState = {
         ...state,
-        products: [
-          ...state.products,
-          {
-            ...action.payload,
-            id: uuidv4(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        ],
+        products: [...state.products, newProduct],
       };
+      dbUpsertProduct(newProduct);
       break;
-    case 'UPDATE_PRODUCT':
+    }
+    case 'UPDATE_PRODUCT': {
+      const updatedProduct: Product = {
+        ...action.payload,
+        updatedAt: new Date().toISOString(),
+      };
       newState = {
         ...state,
-        products: state.products.map((p) =>
-          p.id === action.payload.id
-            ? { ...action.payload, updatedAt: new Date().toISOString() }
-            : p
-        ),
+        products: state.products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)),
       };
+      dbUpsertProduct(updatedProduct);
       break;
+    }
     case 'DELETE_PRODUCT': {
-      const catIds = state.categories.filter(c => c.productId === action.payload).map(c => c.id);
-      const blockIds = state.blocks.filter(b => catIds.includes(b.categoryId)).map(b => b.id);
+      const catIds = state.categories.filter((c) => c.productId === action.payload).map((c) => c.id);
+      const blockIds = state.blocks.filter((b) => catIds.includes(b.categoryId)).map((b) => b.id);
       newState = {
         ...state,
         products: state.products.filter((p) => p.id !== action.payload),
@@ -136,94 +148,117 @@ function appReducer(state: AppState, action: Action): AppState {
         options: state.options.filter((o) => !blockIds.includes(o.blockId)),
         simulations: state.simulations.filter((s) => s.productId !== action.payload),
       };
+      dbDeleteProduct(action.payload);
       break;
     }
-    case 'ADD_CATEGORY':
+    case 'ADD_CATEGORY': {
+      const newCategory: Category = { ...action.payload, id: uuidv4() };
       newState = {
         ...state,
-        categories: [...state.categories, { ...action.payload, id: uuidv4() }],
+        categories: [...state.categories, newCategory],
       };
+      dbUpsertCategory(newCategory);
       break;
-    case 'UPDATE_CATEGORY':
+    }
+    case 'UPDATE_CATEGORY': {
       newState = {
         ...state,
-        categories: state.categories.map((c) =>
-          c.id === action.payload.id ? action.payload : c
-        ),
+        categories: state.categories.map((c) => (c.id === action.payload.id ? action.payload : c)),
       };
+      dbUpsertCategory(action.payload);
       break;
+    }
     case 'DELETE_CATEGORY': {
-      const blkIds = state.blocks.filter(b => b.categoryId === action.payload).map(b => b.id);
+      const blkIds = state.blocks.filter((b) => b.categoryId === action.payload).map((b) => b.id);
       newState = {
         ...state,
         categories: state.categories.filter((c) => c.id !== action.payload),
         blocks: state.blocks.filter((b) => b.categoryId !== action.payload),
         options: state.options.filter((o) => !blkIds.includes(o.blockId)),
       };
+      dbDeleteCategory(action.payload);
       break;
     }
-    case 'ADD_BLOCK':
+    case 'ADD_BLOCK': {
+      const newBlock: ConfigBlock = { ...action.payload, id: uuidv4() };
       newState = {
         ...state,
-        blocks: [...state.blocks, { ...action.payload, id: uuidv4() }],
+        blocks: [...state.blocks, newBlock],
       };
+      dbUpsertBlock(newBlock);
       break;
-    case 'UPDATE_BLOCK':
+    }
+    case 'UPDATE_BLOCK': {
       newState = {
         ...state,
-        blocks: state.blocks.map((b) =>
-          b.id === action.payload.id ? action.payload : b
-        ),
+        blocks: state.blocks.map((b) => (b.id === action.payload.id ? action.payload : b)),
       };
+      dbUpsertBlock(action.payload);
       break;
-    case 'DELETE_BLOCK':
+    }
+    case 'DELETE_BLOCK': {
       newState = {
         ...state,
         blocks: state.blocks.filter((b) => b.id !== action.payload),
         options: state.options.filter((o) => o.blockId !== action.payload),
       };
+      dbDeleteBlock(action.payload);
       break;
-    case 'ADD_OPTION':
+    }
+    case 'ADD_OPTION': {
+      const newOption: Option = { ...action.payload, id: uuidv4() };
       newState = {
         ...state,
-        options: [...state.options, { ...action.payload, id: uuidv4() }],
+        options: [...state.options, newOption],
       };
+      dbUpsertOption(newOption);
       break;
-    case 'UPDATE_OPTION':
+    }
+    case 'UPDATE_OPTION': {
       newState = {
         ...state,
-        options: state.options.map((o) =>
-          o.id === action.payload.id ? action.payload : o
-        ),
+        options: state.options.map((o) => (o.id === action.payload.id ? action.payload : o)),
       };
+      dbUpsertOption(action.payload);
       break;
-    case 'DELETE_OPTION':
+    }
+    case 'DELETE_OPTION': {
       newState = {
         ...state,
         options: state.options.filter((o) => o.id !== action.payload),
       };
+      dbDeleteOption(action.payload);
       break;
-    case 'ADD_SIMULATION':
+    }
+    case 'ADD_SIMULATION': {
+      const newSim: Simulation = {
+        ...action.payload,
+        id: uuidv4(),
+        createdAt: new Date().toISOString(),
+      };
       newState = {
         ...state,
-        simulations: [
-          ...state.simulations,
-          { ...action.payload, id: uuidv4(), createdAt: new Date().toISOString() },
-        ],
+        simulations: [...state.simulations, newSim],
       };
+      dbUpsertSimulation(newSim);
       break;
-    case 'DELETE_SIMULATION':
+    }
+    case 'DELETE_SIMULATION': {
       newState = {
         ...state,
         simulations: state.simulations.filter((s) => s.id !== action.payload),
       };
+      dbDeleteSimulation(action.payload);
       break;
-    case 'UPDATE_RATES':
+    }
+    case 'UPDATE_RATES': {
       newState = {
         ...state,
         rates: action.payload,
       };
+      dbUpsertRates(action.payload);
       break;
+    }
     case 'LOAD_STATE':
       newState = action.payload;
       break;
@@ -277,13 +312,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Sync state changes to Supabase
-  useEffect(() => {
-    if (isSupabaseConfigured) {
-      syncStateToSupabase(state);
-    }
-  }, [state]);
-
   const getProductCategories = useCallback(
     (productId: string) =>
       state.categories
@@ -311,7 +339,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const calculateCost = useCallback(
     (optionIds: string[]): CostSummary => {
       const selectedOptions = state.options.filter((o) => optionIds.includes(o.id));
-      // Also include block-level costs for blocks that have selected options
       const blockIds = [...new Set(selectedOptions.map((o) => o.blockId))];
       const blocks = state.blocks.filter((b) => blockIds.includes(b.id));
 
