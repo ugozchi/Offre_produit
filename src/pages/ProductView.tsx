@@ -241,7 +241,7 @@ export default function ProductView() {
                     />
                     <div className="block-card-name">{block.name}</div>
                     <div className="block-card-meta">
-                      <span className={`badge badge-${block.complexity}`}>
+                      <span className={`badge badge-${block.complexity.toLowerCase()}`}>
                         {block.complexity}
                       </span>
                       <div className="flex items-center gap-sm">
@@ -289,7 +289,7 @@ export default function ProductView() {
             <div className="drawer-header">
               <div>
                 <h3>{isEditing ? 'Modifier le bloc' : selectedBlock.name}</h3>
-                <span className={`badge badge-${selectedBlock.complexity}`}>
+                <span className={`badge badge-${selectedBlock.complexity.toLowerCase()}`}>
                   {selectedBlock.complexity}
                 </span>
               </div>
@@ -584,7 +584,7 @@ export default function ProductView() {
                     <div className="info-item">
                       <span className="info-item-label">📊 Complexité</span>
                       <span className="info-item-value">
-                        <span className={`badge badge-${selectedBlock.complexity}`}>
+                        <span className={`badge badge-${selectedBlock.complexity.toLowerCase()}`}>
                           {selectedBlock.complexity}
                         </span>
                       </span>
